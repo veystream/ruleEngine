@@ -1,0 +1,11 @@
+/.project
+/.settings/
+/.idea
+/.vscode/
+/deploy
+/target
+/**/target
+/build/
+/**/.idea
+*.iml
+out/
