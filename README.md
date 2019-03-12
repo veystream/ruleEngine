@@ -54,7 +54,7 @@ public class AppConfig {
     "gender" :
     {
         "type" : "String",
-        "operator" : "eq",
+        "operator" : "in",
         "operand" : ["male"]
     },
     "hobby" :
@@ -86,17 +86,16 @@ Date：日期需要范围匹配时，会转换成时间戳数值类型再做比�
 ```
 - *AssignmentOperatorType*：规则支持的操作方式
 ```
-eq：等于（等值匹配），operand仅支持一个操作数
 bt：闭区间（范围匹配），operand有且有两个操作数，且不支持String类型
-in：多个等值匹配，只需满足其中一个，operand有任意个操作数
-gt：大于等于（范围匹配），operand仅支持一个操作数，且不支持String类型
-lt：小于等于（范围匹配），operand仅支持一个操作数，且不支持String类型
+in：多个等值匹配，只需满足其中一个，operand有任意个（大于等于1）操作数
+gt：大于（范围匹配），operand仅支持一个操作数，且不支持String类型
+lt：小于（范围匹配），operand仅支持一个操作数，且不支持String类型
 ```
 
 - 规则构建：使用*ExecuteRuleBuilder*构建规则，该构造器会对规则格式做检验。
 ```
 ExecuteRuleBuilder executeRuleBuilder = new ExecuteRuleBuilder();
-executeRuleBuilder.addRuleExpression("gender", AssignmentOperatorType.EQUAL, "male");
+executeRuleBuilder.addRuleExpression("gender", AssignmentOperatorType.IN, "male");
 executeRuleBuilder.addRuleExpression("hobby", AssignmentOperatorType.IN, "travel", "film");
 executeRuleBuilder.addRuleExpression("validDate", AssignmentOperatorType.BETWEEN, new Date[]{DateUtils.parseDate("2018-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss"), DateUtils.parseDate("2018-12-31 23:59:59", "yyyy-MM-dd HH:mm:ss")});
 String user1 = executeRuleBuilder.buildToJSONString();

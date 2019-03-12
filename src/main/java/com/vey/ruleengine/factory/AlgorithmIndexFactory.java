@@ -6,6 +6,7 @@ import com.vey.ruleengine.algorithm.RangeIndex;
 import com.vey.ruleengine.contansts.IndexContants;
 import com.vey.ruleengine.enums.AssignmentOperatorType;
 import com.vey.ruleengine.enums.AssignmentType;
+import com.vey.ruleengine.enums.IndexOperatorType;
 import com.vey.ruleengine.enums.RuleOperateType;
 import com.vey.ruleengine.execption.ErrorMessage;
 import com.vey.ruleengine.model.AssignmentOperator;
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @Auther vey
@@ -37,7 +39,7 @@ public class AlgorithmIndexFactory {
     @Resource
     private RangeIndex rangeIndex;
 
-    public void operate(ExecuteRule executeRule, String assignmentKey, Expression expression, RuleOperateType ruleOperateType) {
+    public void operate(final ExecuteRule executeRule, final String assignmentKey, final Expression expression, final RuleOperateType ruleOperateType) {
         String type = expression.getType();
         String operator = expression.getOperator();
         Object[] operandArr = expression.getOperand();
@@ -80,56 +82,47 @@ public class AlgorithmIndexFactory {
             for (Object operand : operandArr) {
                 operate(ruleOperateType, abstractIndex, assignmentKey, operand, executeRule);
             }
-        } else if (assignmentOperatorType.EQUAL.equals(assignmentOperatorType)) {
-            if (operandArr.length != 1) {
-                LOGGER.warn("[AlgorithmIndexFactory.operate] operate assignment failed! operand is invalid! assignmentKey: {}, expression: {}", assignmentKey, expression);
-                throw new IllegalArgumentException(ErrorMessage.ILLEGAL_ARGUMENTS.getMessage());
-            }
-            operate(ruleOperateType, abstractIndex, assignmentKey, operandArr[0], executeRule);
         } else {
             LOGGER.warn("[AlgorithmIndexFactory.operate] operate assignment failed! operator is invalid! assignmentKey: {}, expression: {}", assignmentKey, expression);
             throw new IllegalArgumentException(ErrorMessage.ILLEGAL_ARGUMENTS.getMessage());
         }
     }
 
-    public List<String> ruleMatchedCount(String assignmentKey, Object assignmentValue, AssignmentOperator assignmentOperator) {
+    public List<String> ruleMatchedCount(final String assignmentKey, final Object assignmentValue, final CopyOnWriteArraySet<AssignmentOperator> assignmentOperators) {
         List<String> ruleCodes = new ArrayList<>();
-        AssignmentOperatorType assignmentOperatorType = assignmentOperator.getOperatorType();
-        AssignmentType type = assignmentOperator.getType();
-        if (assignmentOperatorType == null || type == null) {
-            LOGGER.warn("[AlgorithmIndexFactory.match] match rule failed! operatorType or type not exists! assignmentKey: {}, assignmentValue: {}, assignmentOperatorSet: {}", assignmentKey, assignmentValue, assignmentOperator);
-            throw new RuntimeException(ErrorMessage.ASSIGNMENT_OPERATOR_INVALID.getMessage());
-        }
+        for (AssignmentOperator assignmentOperator : assignmentOperators) {
+            AssignmentOperatorType assignmentOperatorType = assignmentOperator.getOperatorType();
+            AssignmentType type = assignmentOperator.getType();
+            if (assignmentOperatorType == null || type == null) {
+                LOGGER.warn("[AlgorithmIndexFactory.match] match rule failed! operatorType or type not exists! assignmentKey: {}, assignmentValue: {}, assignmentOperatorSet: {}", assignmentKey, assignmentValue, assignmentOperator);
+                throw new RuntimeException(ErrorMessage.ASSIGNMENT_OPERATOR_INVALID.getMessage());
+            }
 
-        AbstractIndex abstractIndex = getIndexAlgorithm(assignmentOperatorType);
-        if (abstractIndex == null) {
-            LOGGER.warn("[AlgorithmIndexFactory.match] match assignment failed! abstractIndex is null! assignmentKey: {}, assignmentValue: {}, assignmentOperatorSet: {}", assignmentKey, assignmentValue, assignmentOperator);
-            throw new IllegalArgumentException(ErrorMessage.ILLEGAL_ARGUMENTS.getMessage());
-        }
-        if (AssignmentOperatorType.BETWEEN.equals(assignmentOperatorType)) {
-            HashSet<String> ruleCodeFrom = abstractIndex.match(getBetweenFromAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.GREAT_THAN);
-            HashSet<String> ruleCodeTo = abstractIndex.match(getBetweenToAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.LESS_THAN);
-            ruleCodes.addAll(ruleCodeFrom);
-            ruleCodes.addAll(ruleCodeTo);
-        } else if (AssignmentOperatorType.GREAT_THAN.equals(assignmentOperatorType)) {
-            HashSet<String> matchRuleCodes = abstractIndex.match(getFromAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.GREAT_THAN);
-            if (!CollectionUtils.isEmpty(matchRuleCodes)) {
-                ruleCodes.addAll(matchRuleCodes);
+            AbstractIndex abstractIndex = getIndexAlgorithm(assignmentOperatorType);
+            if (abstractIndex == null) {
+                LOGGER.warn("[AlgorithmIndexFactory.match] match assignment failed! abstractIndex is null! assignmentKey: {}, assignmentValue: {}, assignmentOperatorSet: {}", assignmentKey, assignmentValue, assignmentOperator);
+                throw new IllegalArgumentException(ErrorMessage.ILLEGAL_ARGUMENTS.getMessage());
             }
-        } else if (AssignmentOperatorType.LESS_THAN.equals(assignmentOperatorType)) {
-            HashSet<String> matchRuleCodes = abstractIndex.match(getToAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.LESS_THAN);
-            if (!CollectionUtils.isEmpty(matchRuleCodes)) {
-                ruleCodes.addAll(matchRuleCodes);
-            }
-        } else if (assignmentOperatorType.IN.equals(assignmentOperatorType)) {
-            HashSet<String> matchRuleCodes = abstractIndex.match(assignmentKey, translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.EQUAL);
-            if (!CollectionUtils.isEmpty(matchRuleCodes)) {
-                ruleCodes.addAll(matchRuleCodes);
-            }
-        } else if (assignmentOperatorType.EQUAL.equals(assignmentOperatorType)) {
-            HashSet<String> matchRuleCodes = abstractIndex.match(assignmentKey, translateAssignmentValue(assignmentValue, type.getCode()), AssignmentOperatorType.EQUAL);
-            if (!CollectionUtils.isEmpty(matchRuleCodes)) {
-                ruleCodes.addAll(matchRuleCodes);
+            if (AssignmentOperatorType.BETWEEN.equals(assignmentOperatorType)) {
+                HashSet<String> ruleCodeFrom = abstractIndex.match(getBetweenFromAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), IndexOperatorType.GREAT_THAN_OR_EQUAL);
+                HashSet<String> ruleCodeTo = abstractIndex.match(getBetweenToAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), IndexOperatorType.LESS_THAN_OR_EQUAL);
+                ruleCodes.addAll(ruleCodeFrom);
+                ruleCodes.addAll(ruleCodeTo);
+            } else if (AssignmentOperatorType.GREAT_THAN.equals(assignmentOperatorType)) {
+                HashSet<String> matchedRuleCodes = abstractIndex.match(getFromAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), IndexOperatorType.GREAT_THAN);
+                if (!CollectionUtils.isEmpty(matchedRuleCodes)) {
+                    ruleCodes.addAll(matchedRuleCodes);
+                }
+            } else if (AssignmentOperatorType.LESS_THAN.equals(assignmentOperatorType)) {
+                HashSet<String> matchedRuleCodes = abstractIndex.match(getToAssignmentKey(assignmentKey), translateAssignmentValue(assignmentValue, type.getCode()), IndexOperatorType.LESS_THAN);
+                if (!CollectionUtils.isEmpty(matchedRuleCodes)) {
+                    ruleCodes.addAll(matchedRuleCodes);
+                }
+            } else if (assignmentOperatorType.IN.equals(assignmentOperatorType)) {
+                HashSet<String> matchedRuleCodes = abstractIndex.match(assignmentKey, translateAssignmentValue(assignmentValue, type.getCode()), IndexOperatorType.EQUAL);
+                if (!CollectionUtils.isEmpty(matchedRuleCodes)) {
+                    ruleCodes.addAll(matchedRuleCodes);
+                }
             }
         }
         return ruleCodes;
@@ -142,7 +135,7 @@ public class AlgorithmIndexFactory {
      * @return
      */
     private AbstractIndex getIndexAlgorithm(AssignmentOperatorType assignmentOperatorType) {
-        if (AssignmentOperatorType.EQUAL.equals(assignmentOperatorType) || AssignmentOperatorType.IN.equals(assignmentOperatorType)) {
+        if (AssignmentOperatorType.IN.equals(assignmentOperatorType)) {
             return invertedIndex;
         } else if (AssignmentOperatorType.BETWEEN.equals(assignmentOperatorType)
                 || AssignmentOperatorType.GREAT_THAN.equals(assignmentOperatorType)

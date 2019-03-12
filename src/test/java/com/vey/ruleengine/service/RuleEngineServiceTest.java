@@ -26,29 +26,29 @@ public class RuleEngineServiceTest extends AbstractTest {
     public void testMatch() throws ParseException {
         Date endDate = DateUtils.addDays(new Date(), 5);
         ExecuteRuleBuilder executeRuleBuilder1 = new ExecuteRuleBuilder();
-        executeRuleBuilder1.addRuleExpression("gender", AssignmentOperatorType.EQUAL, "male");
+        executeRuleBuilder1.addRuleExpression("gender", AssignmentOperatorType.IN, "male");
         executeRuleBuilder1.addRuleExpression("hobby", AssignmentOperatorType.IN, "travel", "film");
         executeRuleBuilder1.addRuleExpression("validDate", AssignmentOperatorType.BETWEEN, new Date[]{DateUtils.parseDate("2018-01-01 00:00:00", yyyyMMddHHmmss), DateUtils.parseDate("2018-12-31 23:59:59", yyyyMMddHHmmss)});
-        // String user1 = "{\"gender\": {\"type\": \"String\",\"operator\": \"eq\",\"operand\": [\"male\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"film\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-01-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
+        // String user1 = "{\"gender\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"male\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"film\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-01-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
         String user1 = executeRuleBuilder1.buildToJSONString();
 
         ExecuteRuleBuilder executeRuleBuilder2 = new ExecuteRuleBuilder();
-        executeRuleBuilder2.addRuleExpression("gender", AssignmentOperatorType.EQUAL, "female");
+        executeRuleBuilder2.addRuleExpression("gender", AssignmentOperatorType.IN, "female");
         executeRuleBuilder2.addRuleExpression("hobby", AssignmentOperatorType.IN, "travel", "book");
         executeRuleBuilder2.addRuleExpression("validDate", AssignmentOperatorType.BETWEEN, new Date[]{DateUtils.parseDate("2018-05-01 00:00:00", yyyyMMddHHmmss), DateUtils.parseDate("2018-12-31 23:59:59", yyyyMMddHHmmss)});
-        //String user2 = "{\"gender\": {\"type\": \"String\",\"operator\": \"eq\",\"operand\": [\"female\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"book\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-05-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
+        //String user2 = "{\"gender\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"female\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"book\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-05-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
         String user2 = executeRuleBuilder2.buildToJSONString();
 
         ExecuteRuleBuilder executeRuleBuilder3 = new ExecuteRuleBuilder();
-        executeRuleBuilder3.addRuleExpression("gender", AssignmentOperatorType.EQUAL, "male");
+        executeRuleBuilder3.addRuleExpression("gender", AssignmentOperatorType.IN, "male");
         executeRuleBuilder3.addRuleExpression("hobby", AssignmentOperatorType.IN, "travel", "book");
-        //String user3 = "{\"gender\": {\"type\": \"String\",\"operator\": \"eq\",\"operand\": [\"male\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"book\"]}}";
+        //String user3 = "{\"gender\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"male\"]},\"hobby\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"travel\", \"book\"]}}";
         String user3 = executeRuleBuilder3.buildToJSONString();
 
         ExecuteRuleBuilder executeRuleBuilder4 = new ExecuteRuleBuilder();
-        executeRuleBuilder4.addRuleExpression("gender", AssignmentOperatorType.EQUAL, "male");
+        executeRuleBuilder4.addRuleExpression("gender", AssignmentOperatorType.IN, "male");
         executeRuleBuilder2.addRuleExpression("validDate", AssignmentOperatorType.BETWEEN, new Date[]{DateUtils.parseDate("2018-01-01 00:00:00", yyyyMMddHHmmss), DateUtils.parseDate("2018-12-31 23:59:59", yyyyMMddHHmmss)});
-        //String user4 = "{\"gender\": {\"type\": \"String\",\"operator\": \"eq\",\"operand\": [\"male\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-01-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
+        //String user4 = "{\"gender\": {\"type\": \"String\",\"operator\": \"in\",\"operand\": [\"male\"]},\"validDate\": {\"type\": \"Date\",\"operator\": \"bt\",\"operand\": [\"2018-01-01 00:00:00\", \"2018-12-31 23:59:59\"]}}";
         String user4 = executeRuleBuilder4.buildToJSONString();
 
         ruleEngineService.add(ExecuteRule.build("rule1", user1, endDate));

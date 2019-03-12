@@ -1,6 +1,6 @@
 package com.vey.ruleengine.algorithm;
 
-import com.vey.ruleengine.enums.AssignmentOperatorType;
+import com.vey.ruleengine.enums.IndexOperatorType;
 import com.vey.ruleengine.model.ExecuteRule;
 import org.springframework.stereotype.Component;
 
@@ -63,19 +63,19 @@ public class RangeIndex extends AbstractIndex {
     }
 
     @Override
-    public HashSet<String> match(String assignmentKey, Object assignmentValue, AssignmentOperatorType operateType) {
+    public HashSet<String> match(String assignmentKey, Object assignmentValue, IndexOperatorType operateType) {
         if (DICT.containsKey(assignmentKey)) {
             Map<Object, CopyOnWriteArraySet<String>> rangeDict = DICT.get(assignmentKey);
 
             HashSet<String> ruleCodes = new HashSet<>();
             Object[] rangeValues = rangeDict.keySet().toArray(new Object[rangeDict.size()]);
-            if (AssignmentOperatorType.GREAT_THAN.equals(operateType)) {
+            if (IndexOperatorType.GREAT_THAN.equals(operateType)) {
                 ruleCodes = BinarySearch.conditionGreatThan(rangeValues, assignmentValue, false, rangeDict);
-            } else if (AssignmentOperatorType.LESS_THAN.equals(operateType)) {
+            } else if (IndexOperatorType.LESS_THAN.equals(operateType)) {
                 ruleCodes = BinarySearch.conditionLessThan(rangeValues, assignmentValue, false, rangeDict);
-            } else if (AssignmentOperatorType.GREAT_THAN.equals(operateType)) {
+            } else if (IndexOperatorType.GREAT_THAN_OR_EQUAL.equals(operateType)) {
                 ruleCodes = BinarySearch.conditionGreatThan(rangeValues, assignmentValue, true, rangeDict);
-            } else if (AssignmentOperatorType.LESS_THAN.equals(operateType)) {
+            } else if (IndexOperatorType.LESS_THAN_OR_EQUAL.equals(operateType)) {
                 ruleCodes = BinarySearch.conditionLessThan(rangeValues, assignmentValue, true, rangeDict);
             }
             return ruleCodes;

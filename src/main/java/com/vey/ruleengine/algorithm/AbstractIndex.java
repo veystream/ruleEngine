@@ -1,6 +1,6 @@
 package com.vey.ruleengine.algorithm;
 
-import com.vey.ruleengine.enums.AssignmentOperatorType;
+import com.vey.ruleengine.enums.IndexOperatorType;
 import com.vey.ruleengine.model.ExecuteRule;
 
 import java.util.HashSet;
@@ -37,5 +37,5 @@ public abstract class AbstractIndex {
      * @param operateType
      * @return
      */
-    public abstract HashSet<String> match(String assignmentKey, Object assignmentValue, AssignmentOperatorType operateType);
+    public abstract HashSet<String> match(String assignmentKey, Object assignmentValue, IndexOperatorType operateType);
 }

@@ -90,12 +90,6 @@ public class ExecuteRuleBuilder {
                 throw new RuntimeException("gt cannot support String!");
             }
         }
-        //eq只允许有一个参数
-        if (operatorType == AssignmentOperatorType.EQUAL) {
-            if (values.length != 1) {
-                throw new RuntimeException("eq cannot match except one value!");
-            }
-        }
         //lt只允许有一个参数，且不支持String
         if (operatorType == AssignmentOperatorType.LESS_THAN) {
             if (values.length != 1) {

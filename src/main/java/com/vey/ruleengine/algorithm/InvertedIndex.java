@@ -1,7 +1,7 @@
 package com.vey.ruleengine.algorithm;
 
 import com.vey.ruleengine.contansts.IndexContants;
-import com.vey.ruleengine.enums.AssignmentOperatorType;
+import com.vey.ruleengine.enums.IndexOperatorType;
 import com.vey.ruleengine.model.ExecuteRule;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +47,7 @@ public class InvertedIndex extends AbstractIndex {
     }
 
     @Override
-    public HashSet<String> match(String assignmentKey, Object assignmentValue, AssignmentOperatorType operateType) {
+    public HashSet<String> match(String assignmentKey, Object assignmentValue, IndexOperatorType operateType) {
         String index = getIndex(assignmentKey, assignmentValue);
         if (DICT.containsKey(index)) {
             Set<String> ruleCodes = DICT.get(index);

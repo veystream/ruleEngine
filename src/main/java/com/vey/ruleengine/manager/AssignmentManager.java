@@ -2,11 +2,11 @@ package com.vey.ruleengine.manager;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.vey.ruleengine.execption.ErrorMessage;
-import com.vey.ruleengine.execption.RuleEngineInternalException;
 import com.vey.ruleengine.enums.AssignmentOperatorType;
 import com.vey.ruleengine.enums.AssignmentType;
 import com.vey.ruleengine.enums.RuleOperateType;
+import com.vey.ruleengine.execption.ErrorMessage;
+import com.vey.ruleengine.execption.RuleEngineInternalException;
 import com.vey.ruleengine.factory.AlgorithmIndexFactory;
 import com.vey.ruleengine.model.AssignmentOperator;
 import com.vey.ruleengine.model.ExecuteRule;
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @Auther vey
@@ -45,7 +46,7 @@ public class AssignmentManager {
      * key：规则的key
      * value：操作方式和操作符号
      */
-    private ConcurrentHashMap<String, AssignmentOperator> assignmentOperators = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, CopyOnWriteArraySet<AssignmentOperator>> assignmentOperators = new ConcurrentHashMap<>();
 
     /**
      * 新增规则
@@ -76,8 +77,8 @@ public class AssignmentManager {
                 JSONObject jsonObject = (JSONObject) conjunction.get(assignmentKey);
                 Expression expression = JSON.parseObject(jsonObject.toJSONString(), Expression.class);
 
-                if (!checkAssignmentOperator(assignmentKey, expression)) {
-                    LOGGER.warn("[AssignmentManager.add] init execute rule failed! checkAssignmentOperator failed! executeRule: {}", executeRule);
+                if (!putToAssignmentOperators(assignmentKey, expression)) {
+                    LOGGER.warn("[AssignmentManager.add] init execute rule failed! putToAssignmentOperators failed! executeRule: {}", executeRule);
                     throw new IllegalArgumentException(ErrorMessage.ILLEGAL_ARGUMENTS.getMessage());
                 }
                 AlgorithmIndexFactory.operate(executeRule, assignmentKey, expression, RuleOperateType.ADD);
@@ -120,11 +121,11 @@ public class AssignmentManager {
             HashMap<String, Integer> ruleMatchedCount = new HashMap<>();
             for (String assignmentKey : conditionJson.keySet()) {
                 Object assignmentValue = conditionJson.get(assignmentKey);
-                AssignmentOperator assignmentOperator = assignmentOperators.get(assignmentKey);
-                if (assignmentOperator == null) {
+                CopyOnWriteArraySet<AssignmentOperator> assignmentOperatorSet = assignmentOperators.get(assignmentKey);
+                if (assignmentOperators == null || assignmentOperatorSet.size() == 0) {
                     continue;
                 }
-                List<String> ruleCodes = AlgorithmIndexFactory.ruleMatchedCount(assignmentKey, assignmentValue, assignmentOperator);
+                List<String> ruleCodes = AlgorithmIndexFactory.ruleMatchedCount(assignmentKey, assignmentValue, assignmentOperatorSet);
                 for (String ruleCode : ruleCodes) {
                     putRuleMatchedCount(ruleMatchedCount, ruleCode);
                 }
@@ -190,19 +191,17 @@ public class AssignmentManager {
      * @param expression
      * @return
      */
-    private boolean checkAssignmentOperator(String assignmentKey, Expression expression) {
+    private boolean putToAssignmentOperators(String assignmentKey, Expression expression) {
         if (StringUtils.isBlank(expression.getOperator()) || StringUtils.isBlank(expression.getType())) {
             return false;
         }
         AssignmentOperator assignmentOperator = new AssignmentOperator(AssignmentOperatorType.of(expression.getOperator()), AssignmentType.of(expression.getType()));
+        CopyOnWriteArraySet<AssignmentOperator> assignmentOperatorSet = new CopyOnWriteArraySet<>();
         if (assignmentOperators.containsKey(assignmentKey)) {
-            if (assignmentOperator.getOperatorType().equals(assignmentOperators.get(assignmentKey))) {
-                LOGGER.warn("[AssignmentManager.checkAssignmentOperator] valid assignment operator, assignmentKey: {}", assignmentKey);
-                return false;
-            }
-        } else {
-            assignmentOperators.put(assignmentKey, assignmentOperator);
+            assignmentOperatorSet = assignmentOperators.get(assignmentKey);
         }
+        assignmentOperatorSet.add(assignmentOperator);
+        assignmentOperators.put(assignmentKey, assignmentOperatorSet);
         return true;
     }
 

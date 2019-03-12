@@ -6,19 +6,14 @@ package com.vey.ruleengine.enums;
  */
 public enum AssignmentOperatorType {
     /**
-     * 等于（等值匹配），operand仅支持一个操作数
+     * 多个等值匹配，只需满足其中一个，operand有任意个操作数，包括一个
      */
-    EQUAL("eq", 1),
+    IN("in", 1),
 
     /**
      * 闭区间（范围匹配），operand有且有两个操作数
      */
     BETWEEN("bt", 2),
-
-    /**
-     * 多个等值匹配，只需满足其中一个，operand有任意个操作数
-     */
-    IN("in", 1),
 
     /**
      * 大于等于（范围匹配），operand仅支持一个操作数
