@@ -98,6 +98,16 @@ ExecuteRuleBuilder executeRuleBuilder = new ExecuteRuleBuilder();
 executeRuleBuilder.addRuleExpression("gender", AssignmentOperatorType.IN, "male");
 executeRuleBuilder.addRuleExpression("hobby", AssignmentOperatorType.IN, "travel", "film");
 executeRuleBuilder.addRuleExpression("validDate", AssignmentOperatorType.BETWEEN, new Date[]{DateUtils.parseDate("2018-01-01 00:00:00", "yyyy-MM-dd HH:mm:ss"), DateUtils.parseDate("2018-12-31 23:59:59", "yyyy-MM-dd HH:mm:ss")});
-String user1 = executeRuleBuilder.buildToJSONString();
+String user = executeRuleBuilder.buildToJSONString();
 ```
 
+- 生成规则对象，新增规则
+```
+ruleEngineService.add(ExecuteRule.build("rule1", user, DateUtils.parseDate("2028-01-01 00:00:00", , "yyyy-MM-dd HH:mm:ss")));
+```
+
+- 条件匹配规则
+```
+String condition = "{\"gender\":\"male\",\"hobby\":\"travel\",\"validDate\":\"2018-06-01 00:00:00\"}";
+List<ExecuteRule> result = ruleEngineService.match(condition);
+```
