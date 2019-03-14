@@ -68,20 +68,6 @@
     <pluginRepositories>
     </pluginRepositories>
 
-    <!-- private repo nexus -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>snapshots</name>
-            <url>http://10.3.16.118:8081/repository/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>releases</id>
-            <name>releases</name>
-            <url>http://10.3.16.118:8081/repository/releases/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
 
